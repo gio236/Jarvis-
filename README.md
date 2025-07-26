@@ -1,4 +1,4 @@
-# GIARVIS - AI Voice Assistant
+# Jarvis - AI Voice Assistant
 
 GIARVIS is a C-based voice assistant that integrates speech recognition, AI-powered responses, and text-to-speech functionality. The assistant responds to the wake word "jarvis" and can perform various tasks including weather queries, music playback, and general conversation.
 
