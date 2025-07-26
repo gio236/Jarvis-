@@ -1,4 +1,4 @@
-# Jarvis - AI Voice Assistant
+# GIARVIS - AI Voice Assistant
 
 GIARVIS is a C-based voice assistant that integrates speech recognition, AI-powered responses, and text-to-speech functionality. The assistant responds to the wake word "jarvis" and can perform various tasks including weather queries, music playback, and general conversation.
 
@@ -14,11 +14,11 @@ GIARVIS is a C-based voice assistant that integrates speech recognition, AI-powe
 ## Prerequisites
 
 ### Required Libraries
-- **Vosk**: Speech recognition library
+- **Vosk**: Speech recognition library (vosk_api.h + libvosk.so)
 - **Jansson**: JSON parsing library
 - **eSpeak**: Text-to-speech synthesis
-- **aplay**: Audio playback utility
-- **jq**: JSON processor
+- **aplay**: Audio playbook utility
+- **jq**: JSON processor (for parsing API responses)
 - **curl**: HTTP client
 - **mpv**: Media player
 
@@ -39,9 +39,13 @@ sudo apt install espeak aplay jq curl mpv build-essential
 ```
 
 **For Vosk:**
-- Download Vosk from [https://alphacephei.com/vosk/](https://alphacephei.com/vosk/)
+- Download Vosk C API from [https://alphacephei.com/vosk/](https://alphacephei.com/vosk/)
+- You need these specific files:
+  - `vosk_api.h` (header file)
+  - `libvosk.so` (shared library)
 - Download the Italian model `vosk-model-it-0.22`
-- Extract to your project directory
+- Extract model to your project directory
+- Place `vosk_api.h` and `libvosk.so` in your project directory
 
 **For Jansson:**
 ```bash
@@ -69,7 +73,7 @@ arecord -f S16_LE -r 16000 -c 1 | ./test
 ```
 
 ### Voice Commands
-- **Wake Word**: To activate the assistant, say "jarvis" at the end of the sentence.
+- **Wake Word**: Say "jarvis" at the end of the prhase to activate the assistant
 - **Weather**: Ask about weather conditions in Bologna
 - **Music**: Request music playback with commands like "metti musica"
 - **Shutdown**: Say shutdown commands to terminate the assistant
@@ -97,6 +101,8 @@ The assistant is configured with a specific personality and behavior:
 project/
 ├── test.c              # Main source code
 ├── test                # Compiled executable
+├── vosk_api.h          # Vosk header file
+├── libvosk.so          # Vosk shared library
 ├── vosk-model-it-0.22/ # Italian speech recognition model
 ├── output.txt          # Temporary file for AI responses
 └── ~/Downloads/musica/ # Music directory (*.mp3 files)
