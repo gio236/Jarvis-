@@ -1,193 +1,266 @@
-# JARVIS - AI Voice Assistant
+# JARVIS - Assistente Vocale AI
 
-GIARVIS is a C-based voice assistant that integrates speech recognition, AI-powered responses, and text-to-speech functionality. The assistant responds to the wake word "jarvis" and can perform various tasks including weather queries, music playback, and general conversation.
+JARVIS è un assistente vocale avanzato basato su C che integra riconoscimento vocale, risposte basate su AI e funzionalità text-to-speech. L'assistente risponde alle parole di attivazione "jarvis" o "darwin" e può eseguire vari compiti incluse richieste meteo, riproduzione musicale, gestione notifiche, controllo remoto SSH e conversazione generale con memoria persistente.
 
-## Features
+## Caratteristiche
 
-- **Voice Recognition**: Real-time speech recognition using Vosk API
-- **AI Integration**: Powered by Groq's Llama 4 Scout model for intelligent responses
-- **Text-to-Speech**: Italian voice synthesis using eSpeak
-- **Music Control**: Automatic music playback when requested
-- **Weather Information**: Weather queries for Bologna, Italy
-- **System Control**: Shutdown command functionality
+- **Riconoscimento Vocale**: Riconoscimento vocale in tempo reale utilizzando l'API Vosk
+- **Integrazione AI**: Alimentato dal modello Llama 4 Scout di Groq per risposte intelligenti
+- **Text-to-Speech**: Sintesi vocale italiana utilizzando Google Text-to-Speech (gtts-cli)
+- **Controllo Musicale**: Riproduzione automatica della musica locale e remota tramite SSH
+- **Informazioni Meteo**: Richieste meteo per Bologna, Italia con visualizzazione ASCII art
+- **Sistema Notifiche**: Gestione promemoria con invio via Telegram e notifiche desktop
+- **Controllo Remoto SSH**: Comando di dispositivi remoti (laptop1)
+- **Memoria Persistente**: Sistema di memoria a lungo termine per apprendimento continuo
+- **Risposte JSON**: Formato di risposta strutturato per azioni precise
 
-## Prerequisites
+## Prerequisiti
 
-### Required Libraries
-- **Vosk**: Speech recognition library (vosk_api.h + libvosk.so)
-- **Jansson**: JSON parsing library
-- **eSpeak**: Text-to-speech synthesis
-- **aplay**: Audio playbook utility
-- **jq**: JSON processor (for parsing API responses)
-- **curl**: HTTP client
-- **mpv**: Media player
+### Librerie Richieste
+- **Vosk**: Libreria di riconoscimento vocale (vosk_api.h + libvosk.so)
+- **Jansson**: Libreria di parsing JSON
+- **gtts-cli**: Google Text-to-Speech CLI per sintesi vocale italiana
+- **mpv**: Lettore multimediale per audio e musica
+- **jq**: Processore JSON per gestione cronologia conversazioni
+- **curl**: Client HTTP per chiamate API e notifiche Telegram
+- **notify-send**: Sistema notifiche desktop Linux
+- **ssh**: Client SSH per controllo remoto
 
-### System Requirements
-- Linux-based operating system
-- Microphone for audio input
-- Audio output device
-- Internet connection for AI API calls
+### Requisiti di Sistema
+- Sistema operativo basato su Linux
+- Microfono per input audio
+- Dispositivo di output audio
+- Connessione internet per chiamate API AI
 
-## Installation
+## Installazione
 
-### 1. Install Dependencies
+### 1. Installare le Dipendenze
 
 **Ubuntu/Debian:**
 ```bash
 sudo apt update
-sudo apt install espeak aplay jq curl mpv build-essential
+sudo apt install curl mpv jq libnotify-bin openssh-client build-essential
+pip3 install gTTS-cli
 ```
 
-**For Vosk:**
-- Download Vosk C API from [https://alphacephei.com/vosk/](https://alphacephei.com/vosk/)
-- You need these specific files:
-  - `vosk_api.h` (header file)
-  - `libvosk.so` (shared library)
-- Download the Italian model `vosk-model-it-0.22`
-- Extract model to your project directory
-- Place `vosk_api.h` and `libvosk.so` in your project directory
+**Per Vosk:**
+- Scarica l'API C di Vosk da [https://alphacephei.com/vosk/](https://alphacephei.com/vosk/)
+- Hai bisogno di questi file specifici:
+  - `vosk_api.h` (file header)
+  - `libvosk.so` (libreria condivisa)
+- Scarica il modello italiano `vosk-model-it-0.22`
+- Estrai il modello nella directory del progetto
+- Posiziona `vosk_api.h` e `libvosk.so` nella directory del progetto
 
-**For Jansson:**
+**Per Jansson:**
 ```bash
 sudo apt install libjansson-dev
 ```
 
-### 2. Setup API Key
-Replace `YOUR API KEY` in the source code with your actual Groq API key:
-```c
-"-H \"Authorization: Bearer YOUR_GROQ_API_KEY\" "
+### 2. Configurazione API e Credenziali
+**Groq API:**
+Sostituisci il token nell'header Authorization del comando curl nel codice:
+```bash
+-H "Authorization: Bearer LA_TUA_CHIAVE_API_GROQ"
 ```
 
-### 3. Compilation
+**Telegram Bot (per notifiche):**
+Configura il token del bot e chat ID nel codice:
+```c
+// Sostituisci TOKEN e CHATID con i tuoi valori
+"https://api.telegram.org/botTOKEN-d chat_id=CHATID"
+```
+
+**SSH (per controllo remoto):**
+Configura l'accesso SSH senza password:
+```bash
+ssh-keygen -t rsa
+ssh-copy-id gioele@192.168.1.113
+```
+
+### 3. Compilazione
 ```bash
 export LD_LIBRARY_PATH=~/vosk
 gcc test.c -o test -I. -L. -lvosk -ljansson
 ```
 
-## Usage
+## Utilizzo
 
-### Running the Assistant
+### Esecuzione dell'Assistente
 ```bash
 export LD_LIBRARY_PATH=~/vosk
 arecord -f S16_LE -r 16000 -c 1 | ./test
 ```
 
-### Voice Commands
-- **Wake Word**: Say "jarvis" at the end of the prhase to activate the assistant
-- **Weather**: Ask about weather conditions in Bologna
-- **Music**: Request music playback with commands like "metti musica"
-- **Shutdown**: Say shutdown commands to terminate the assistant
-- **General Queries**: Ask any question for AI-powered responses
+### Comandi Vocali
+- **Parole di Attivazione**: Dì "jarvis" o "darwin" nella frase per attivare l'assistente
+- **Meteo**: Chiedi le condizioni meteo a Bologna con visualizzazione ASCII art
+- **Musica Locale**: Richiedi la riproduzione musicale con "metti musica"
+- **Musica Remota**: Richiedi musica su laptop1 con "metti musica su laptop1"
+- **Notifiche**: "Ricordami di [cosa] tra [tempo]" per impostare promemoria
+- **Spegnimento Locale**: "spegniti" per terminare l'assistente
+- **Spegnimento Remoto**: "spegni laptop1" per spegnere il dispositivo remoto
+- **Richieste Generali**: Fai qualsiasi domanda per risposte basate su AI
 
-## Configuration
+## Configurazione
 
-### System Prompt
-The assistant is configured with a specific personality and behavior:
-- Name: GIARVIS (responds to "jarvis")
-- Owner: Gioele
-- Language: Italian
-- Response Style: Concise and helpful
-- Special Commands: Music playback and system shutdown
+### Prompt di Sistema
+L'assistente è configurato con una personalità e comportamenti specifici:
+- **Nome**: JARVIS (risponde anche a "darwin")
+- **Proprietario**: Gioele (15 anni, studente ITIS informatica a Bologna)
+- **Lingua**: Italiano
+- **Formato Risposta**: JSON strutturato con campi "risposta" e "azione"
+- **Memoria Persistente**: Salvataggio automatico di informazioni importanti
+- **Contesto Personale**: Conosce interessi (Spider-Man, Iron Man, Roblox, Netflix)
+- **Comandi Speciali**: Gestione musica, notifiche, controllo remoto SSH
 
-### Audio Settings
-- **Sample Rate**: 16kHz
-- **Format**: 16-bit Little Endian
-- **Channels**: Mono
-- **Voice**: Italian female voice (it+f3)
-- **Speech Rate**: 110 words per minute
+### Impostazioni Audio
+- **Frequenza di Campionamento**: 16kHz
+- **Formato**: 16-bit Little Endian
+- **Canali**: Mono
+- **Text-to-Speech**: Google TTS italiano via gtts-cli
+- **Riproduzione**: mpv per audio e musica
 
-## File Structure
+## Struttura File
 ```
-project/
-├── test.c              # Main source code
-├── test                # Compiled executable
-├── vosk_api.h          # Vosk header file
-├── libvosk.so          # Vosk shared library
-├── vosk-model-it-0.22/ # Italian speech recognition model
-├── output.txt          # Temporary file for AI responses
-└── ~/Downloads/musica/ # Music directory (*.mp3 files)
+progetto/
+├── test.c              # Codice sorgente principale
+├── test                # Eseguibile compilato
+├── vosk_api.h          # File header Vosk
+├── libvosk.so          # Libreria condivisa Vosk
+├── vosk-model-it-0.22/ # Modello riconoscimento vocale italiano
+├── history.json        # Cronologia conversazioni (formato JSON)
+├── output.txt          # Risposta AI completa
+├── risposta.txt        # Testo di risposta estratto
+├── azione.txt          # Comando azione estratto
+├── memoria.txt         # Memoria persistente a lungo termine
+├── meteo.txt           # Dati meteo temporanei
+├── date.txt            # Timestamp corrente
+├── notify.txt          # Dati notifiche temporanei
+├── voce.mp3            # File audio TTS temporaneo
+└── ~/Downloads/musica/ # Directory musica (file *.mp3)
 ```
 
-## How It Works
+## Come Funziona
 
-1. **Audio Capture**: The program captures audio from microphone using `arecord`
-2. **Speech Recognition**: Vosk processes audio stream and converts speech to text
-3. **Wake Word Detection**: Monitors for "jarvis" in the recognized text
-4. **AI Processing**: Sends recognized text to Groq API with system prompt
-5. **Response Generation**: Receives AI response and saves to output file
-6. **Text-to-Speech**: Converts response to speech using eSpeak
-7. **Action Execution**: Processes special commands (music, shutdown)
+1. **Inizializzazione Sistema**: Carica meteo, orario, data e memoria persistente
+2. **Cattura Audio**: Il programma cattura l'audio dal microfono usando `arecord`
+3. **Riconoscimento Vocale**: Vosk elabora lo stream audio e converte il parlato in testo
+4. **Rilevamento Parole di Attivazione**: Monitora "jarvis" o "darwin" nel testo riconosciuto
+5. **Costruzione Cronologia**: Aggiunge il messaggio utente alla cronologia JSON conversazione
+6. **Elaborazione AI**: Invia cronologia completa all'API Groq con prompt di sistema
+7. **Parsing Risposta**: Estrae risposta testuale e comando azione dal JSON ricevuto
+8. **Text-to-Speech**: Converte la risposta in parlato usando Google TTS
+9. **Esecuzione Azioni**: Elabora comandi speciali (musica, notifiche, SSH, memoria)
+10. **Salvataggio Cronologia**: Aggiunge risposta AI alla cronologia per contesto futuro
 
-## Special Commands
+## Comandi Speciali
 
-### Music Playback
-When the AI response contains `{musica:avvio}`, the system automatically plays music files from `~/Downloads/musica/`
+### Riproduzione Musicale
+Quando la risposta AI contiene `{musica:avvio}`, il sistema riproduce automaticamente i file musicali da `~/Downloads/musica/`
 
-### System Shutdown
-When the AI response contains `{spegnimento:avvio}`, the assistant terminates
+### Spegnimento Sistema
+Quando la risposta AI contiene `{spegnimento:avvio}`, l'assistente si termina
 
-### Weather Queries
-Weather information is fetched from `wttr.in/Bologna` with custom formatting
+### Richieste Meteo
+Le informazioni meteo vengono recuperate da `wttr.in/Bologna` con formattazione personalizzata
 
-## API Integration
+## Integrazione API
 
-The assistant uses Groq's API with the following configuration:
-- **Model**: meta-llama/llama-4-scout-17b-16e-instruct
+## Integrazione API
+
+L'assistente utilizza l'API di Groq con la seguente configurazione:
+- **Modello**: meta-llama/llama-4-scout-17b-16e-instruct
 - **Endpoint**: https://api.groq.com/openai/v1/chat/completions
 - **Content-Type**: application/json
-- **Authentication**: Bearer token required
+- **Autenticazione**: Token Bearer richiesto
+- **Cronologia**: Invia l'intera cronologia conversazione per contesto
 
-## Troubleshooting
+### Servizi Esterni
+- **wttr.in**: Servizio meteo per Bologna
+- **Telegram Bot API**: Invio notifiche remote
+- **Google TTS**: Sintesi vocale italiana
 
-### Common Issues
-1. **Audio Input Problems**: Check microphone permissions and ALSA configuration
-2. **Vosk Model Not Found**: Ensure the Italian model is in the correct directory
-3. **API Authentication**: Verify your Groq API key is valid and properly configured
-4. **Library Dependencies**: Make sure all required libraries are installed
+## Risoluzione Problemi
+
+### Problemi Comuni
+1. **Audio Input**: Controlla permessi microfono e configurazione ALSA
+2. **Modello Vosk Non Trovato**: Verifica il modello italiano nella directory corretta
+3. **API Authentication**: Controlla validità chiave API Groq
+4. **Dipendenze Librerie**: Installa tutte le librerie richieste
+5. **SSH Non Funziona**: Configura chiavi SSH senza password
+6. **Telegram Non Invia**: Verifica token bot e chat ID
+7. **JSON Malformato**: L'AI deve rispondere solo in JSON valido
+8. **gtts-cli Non Trovato**: Installa con `pip3 install gTTS-cli`
+9. **Memoria Non Salvata**: Verifica permessi scrittura file `memoria.txt`
+10. **Notifiche Non Mostrate**: Installa `libnotify-bin`
 
 ### Debug Mode
-The program outputs various debug information including:
-- Current timestamp
-- System prompt
-- Recognized text
-- Full curl command
-- AI response
+Il programma mostra informazioni di debug:
+- Timestamp corrente e data
+- Condizioni meteo Bologna
+- Prompt di sistema completo
+- Cronologia conversazioni JSON
+- Testo riconosciuto da Vosk
+- Comando curl completo per API
+- Risposta AI grezza
+- Azione estratta e parametri
+- Comandi sistema eseguiti
 
-## Contributing
+## Personalizzazione
 
-This is a personal project for voice assistant functionality. Feel free to fork and modify according to your needs.
+### Cambio Proprietario
+Modifica le informazioni personali nel codice:
+```c
+char abitudini[] = "... Mi chiamo [NOME], ho [ETA] anni ...";
+```
 
-## License
+### Aggiunta Nuove Azioni
+1. Aggiungi nuovo case nel parsing azioni:
+```c
+if (strstr(azionetesto, "nuova_azione")) {
+    // Esegui comando
+}
+```
+2. Aggiorna prompt di sistema con nuova azione valida
 
-This project is for educational and personal use. Please respect the terms of service of all integrated APIs and libraries.
+### Configurazione SSH
+Modifica indirizzo IP del dispositivo remoto:
+```c
+"ssh gioele@[IP_ADDRESS]"
+```
 
-## Language Customization
+## Licenza
 
-### Switching to English Version
+Questo progetto è per uso educativo e personale. Per favore rispetta i termini di servizio di tutte le API e librerie integrate.
 
-If you want to switch to English version, you can do this:
+## Personalizzazione Lingua
 
-1. **Change the Vosk model**: Replace the Italian model with an English one in your project directory
-   - Download an English model like `vosk-model-en-us-0.22` from [Vosk Models](https://alphacephei.com/vosk/models.html)
-   - Update the model path in the code:
+### Passaggio alla Versione Inglese
+
+Se vuoi passare alla versione inglese, puoi fare questo:
+
+1. **Cambia il modello Vosk**: Sostituisci il modello italiano con uno inglese nella directory del progetto
+   - Scarica un modello inglese come `vosk-model-en-us-0.22` da [Modelli Vosk](https://alphacephei.com/vosk/models.html)
+   - Aggiorna il percorso del modello nel codice:
    ```c
    VoskModel *model = vosk_model_new("vosk-model-en-us-0.22");
    ```
 
-2. **Replace the system prompt**: Modify the prompt variable to use English instructions
-   - Change the Italian instructions to English equivalents
-   - Update weather location if needed (replace Bologna with your city)
+2. **Sostituisci il prompt di sistema**: Modifica la variabile prompt per usare istruzioni inglesi
+   - Cambia le istruzioni italiane con equivalenti inglesi
+   - Aggiorna la località meteo se necessario (sostituisci Bologna con la tua città)
 
-3. **Replace text-to-speech with English mode**: Update the eSpeak voice settings
-   - Change from Italian voice `it+f3` to English voice like `en+f3`
-   - Update both in the `speak()` function and the curl command:
+3. **Sostituisci text-to-speech con modalità inglese**: Aggiorna le impostazioni voce eSpeak
+   - Cambia dalla voce italiana `it+f3` alla voce inglese come `en+f3`
+   - Aggiorna sia nella funzione `speak()` che nel comando curl:
    ```c
    "espeak -v en+f3 -s 110"
    ```
 
-## Credits
+## Crediti
 
-- **Vosk**: Speech recognition
-- **Groq**: AI language model
-- **eSpeak**: Text-to-speech synthesis
-- **Jansson**: JSON parsing
+- **Vosk**: Riconoscimento vocale
+- **Groq**: Modello linguistico AI
+- **eSpeak**: Sintesi text-to-speech
+- **Jansson**: Parsing JSON
